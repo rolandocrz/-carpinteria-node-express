@@ -1,8 +1,8 @@
 import express from "express";
 
 // Importacion de rutas
-import mueblesRoutes from "./router/muebleRouter.js";
-import usuarioRoutes from "./router/usuarioRoutes.js";
+import mueblesRoutes from "./routers/muebleRouter.js";
+import usuarioRoutes from "./routers/usuarioRoutes.js";
 
 // Crear instancia express
 const app = express();
