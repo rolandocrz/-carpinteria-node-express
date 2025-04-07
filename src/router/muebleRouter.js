@@ -7,7 +7,7 @@ import {
   createMueble,
   updateMueble,
   deleteMueble,
-} from "../controllers/mueblesController.js";
+} from "../controllers/muebleController.js";
 
 const router = Router();
 
