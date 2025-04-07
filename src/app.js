@@ -2,12 +2,15 @@ import express from "express";
 
 // Importacion de rutas
 import mueblesRoutes from "./router/muebleRouter.js";
+import usuarioRoutes from "./router/usuarioRoutes.js";
 
 // Crear instancia express
 const app = express();
 
 // uso de las rutas
+app.use(express.json());
 app.use("/api", mueblesRoutes);
+app.use("/api", usuarioRoutes);
 
 // Politicas CORS
 app.use((req, res, next) => {
