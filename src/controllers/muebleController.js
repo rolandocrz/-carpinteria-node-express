@@ -28,7 +28,26 @@ const getMueble = async (req, res) => {
 
 const getMueblesPorCategoria = async (req, res) => {};
 
-const createMueble = async (req, res) => {};
+const createMueble = async (req, res) => {
+  try {
+    const { nombre, descripcion, categoria, precio } = req.body;
+    const imagen = req.file ? req.file.filename : null;
+    const [result] = await pool.query(
+      "INSERT INTO muebles (nombre, descripcion, categoria, precio, imagen) VALUES (?, ?, ?, ?, ?)",
+      [nombre, descripcion, categoria, precio, imagen]
+    );
+    res.status(201).json({
+      id_mueble: result.insertId,
+      nombre,
+      descripcion,
+      categoria,
+      precio,
+      imagen,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
 
 const updateMueble = async (req, res) => {};
 

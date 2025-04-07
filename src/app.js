@@ -1,4 +1,6 @@
 import express from "express";
+import path from "path";
+import { fileURLToPath } from "url";
 
 // Importacion de rutas
 import mueblesRoutes from "./routers/muebleRouter.js";
@@ -6,6 +8,12 @@ import usuarioRoutes from "./routers/usuarioRoutes.js";
 
 // Crear instancia express
 const app = express();
+
+// Configuracion de la carpeta de subida de imagenes
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // uso de las rutas
 app.use(express.json());
