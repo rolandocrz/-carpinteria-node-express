@@ -31,25 +31,45 @@ const getMueble = async (req, res) => {
 // Funcion para obtener muebles por categoria
 const getMueblesPorCategoria = async (req, res) => {};
 
-// Funcion para crear un nuevo mueble
 const createMueble = async (req, res) => {
   try {
     const { nombre, descripcion, categoria, precio } = req.body;
     const imagen = req.file ? req.file.filename : null;
+
+    // Validar que el precio sea un número valido y mayor que 0
+    if (isNaN(precio) || parseFloat(precio) <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: "El precio debe ser un número válido mayor que cero.",
+      });
+    }
+
+    // Convertir precio a numero
+    const precioNumerico = parseFloat(precio);
+
+    // Insertar el mueble en la base de datos
     const [result] = await pool.query(
       "INSERT INTO muebles (nombre, descripcion, categoria, precio, imagen) VALUES (?, ?, ?, ?, ?)",
-      [nombre, descripcion, categoria, precio, imagen]
+      [nombre, descripcion, categoria, precioNumerico, imagen]
     );
+
+    // Regresar el mensaje en caso de exito
     res.status(201).json({
+      success: true,
       id_mueble: result.insertId,
       nombre,
       descripcion,
       categoria,
-      precio,
+      precio: precioNumerico,
       imagen,
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("Error al crear el mueble:", error);
+    // Mensajes de error
+    res.status(500).json({
+      success: false,
+      message: "Error al crear el mueble: " + error.message,
+    });
   }
 };
 
