@@ -23,3 +23,4 @@ router.delete('/usuarios/:id', eliminarUsuario);
 export default router;
 
 // comentario para dar por finalizado el issue #1
+//comentario para dar por finalizado el issue #4
