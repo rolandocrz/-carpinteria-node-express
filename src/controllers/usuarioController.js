@@ -9,7 +9,7 @@ import bcrypt from "bcryptjs";
 // GET /api/usuarios
 const getUsuarios = async (req, res) => {
     try {
-        const [rows] = await pool.promise().query("SELECT * FROM usuarios");
+        const [rows] = await pool.query("SELECT * FROM usuarios");
         res.json(rows);
     } catch (error) {
         console.error(error);
@@ -22,7 +22,7 @@ const getUsuarios = async (req, res) => {
 const getUsuarioPorId = async (req, res) => {
     const { id } = req.params;
     try {
-        const [rows] = await pool.promise().query("SELECT * FROM usuarios WHERE id_usuario = ?", [id]);
+        const [rows] = await pool.query("SELECT * FROM usuarios WHERE id_usuario = ?", [id]);
         if (rows.length === 0) {
             return res.status(404).json({ error: "Usuario no encontrado" });
         }
@@ -40,7 +40,7 @@ const registrarUsuario = async (req, res) => {
     try {
         const salt = await bcrypt.genSalt(10);
         const contrasenaHash = await bcrypt.hash(contrasena, salt);
-        const [result] = await pool.promise().query(
+        const [result] = await pool.query(
             "INSERT INTO usuarios (usuario, contrasena, es_admin ) VALUES (?, ?, ?)", 
             [usuario, contrasenaHash, es_admin]);
         res.status(201).json({ id_usuario: result.insertId, usuario, es_admin });
@@ -54,15 +54,32 @@ const registrarUsuario = async (req, res) => {
 // POST /usuarios/login
 const autenticarUsuario = async (req, res) => {
     const { usuario, contrasena } = req.body;
+    if (!usuario || !contrasena) {
+        return res.status(400).json({ error: "Usuario y contraseña son requeridos" });
+    }
     try {
-        const [rows] = await pool.promise().query(
-            "SELECT * FROM usuarios WHERE usuario = ? AND contrasena = ?", 
-            [usuario, contrasena]
+        const [rows] = await pool.query(
+            "SELECT * FROM usuarios WHERE usuario = ?", 
+            [usuario.trim()]
         );
         if (rows.length === 0) {
             return res.status(401).json({ error: "Credenciales incorrectas" });
         }
-        res.json({ mensaje: "Login exitoso", usuario: rows[0] });
+        const usuarioDb = rows[0];
+        const contrasenaValida = await bcrypt.compare(
+            contrasena.trim(), 
+            usuarioDb.contrasena
+        );
+
+        if (!contrasenaValida) {
+            return res.status(401).json({ error: "Credenciales incorrectas" });
+        }
+
+        const { contrasena: _, ...usuarioSinContrasena } = usuarioDb;
+
+        res.json({ mensaje: "Login exitoso", 
+            usuario: usuarioSinContrasena
+        });
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: "Error al autenticar el usuario" });
@@ -70,14 +87,17 @@ const autenticarUsuario = async (req, res) => {
 };
 
 // Función para actualizar un usuario
-// PATCH /usuarios/:id
+// PATCH /usuarios/:id    /// corregir el metodo a PATCH
 const actualizarUsuario = async (req, res) => {
     const { id } = req.params;
-    const { usuario, contrasena, es_admin } = req.body;
+    const { usuario, es_admin } = req.body;
+    if (!usuario && es_admin === undefined) {
+        return res.status(400).json({ error: "Debe proporcionar al menos un campo para actualizar" });
+    }
     try {
-        const [result] = await pool.promise().query(
-            "UPDATE usuarios SET usuario = ?, contrasena = ?, es_admin = ? WHERE id_usuario = ?", 
-            [usuario, contrasena, es_admin, id]
+        const [result] = await pool.query(
+            "UPDATE usuarios SET usuario = IFNULL (?, usuario),  es_admin = IFNULL (?, es_admin) WHERE id_usuario = ?", 
+            [usuario, es_admin, id]
         );
         if (result.affectedRows === 0) {
             return res.status(404).json({ error: "Usuario no encontrado" });
@@ -94,7 +114,7 @@ const actualizarUsuario = async (req, res) => {
 const eliminarUsuario = async (req, res) => {
     const { id } = req.params;
     try {
-        const [result] = await pool.promise().query("DELETE FROM usuarios WHERE id_usuario = ?", [id]);
+        const [result] = await pool.query("DELETE FROM usuarios WHERE id_usuario = ?", [id]);
         if (result.affectedRows === 0) {
             return res.status(404).json({ error: "Usuario no encontrado" });
         }
