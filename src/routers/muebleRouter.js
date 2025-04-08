@@ -13,7 +13,7 @@ import {
 // Configuracion de Multer para la subida de imagenes
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "src/uploads/"); // destino de la imagen
+    cb(null, "uploads/"); // destino de la imagen
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
