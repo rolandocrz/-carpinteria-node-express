@@ -70,7 +70,7 @@ const autenticarUsuario = async (req, res) => {
 };
 
 // Función para actualizar un usuario
-// PATCH /usuarios/:id
+// PATCH /usuarios/:id    /// corregir el metodo a PATCH
 const actualizarUsuario = async (req, res) => {
     const { id } = req.params;
     const { usuario, contrasena, es_admin } = req.body;
