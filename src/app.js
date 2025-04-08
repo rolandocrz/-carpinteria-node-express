@@ -15,11 +15,6 @@ const __dirname = path.dirname(__filename);
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-// uso de las rutas
-app.use(express.json());
-app.use("/api", mueblesRoutes);
-app.use("/api", usuarioRoutes);
-
 // Politicas CORS
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
@@ -33,6 +28,11 @@ app.use((req, res, next) => {
 
   next();
 });
+
+// uso de las rutas
+app.use(express.json());
+app.use("/api", mueblesRoutes);
+app.use("/api", usuarioRoutes);
 
 // ruta raiz
 app.get("/", (req, res) => {
